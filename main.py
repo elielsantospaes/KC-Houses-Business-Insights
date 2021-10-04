@@ -1,8 +1,12 @@
 # Projeto de portfólio com da base de dados da House Rocket
 import pandas as pd
+from pandas._config.config import set_option
 import numpy as np
 import plotly.express as px
 import streamlit as st
+
+st.set_page_config(layout = 'wide')
+
 
 # 1 - Questões de negócio.
     # 1 - Quais os imóveis que a House Rocket deveria comprar e por qual preço?
@@ -27,22 +31,55 @@ import streamlit as st
         # - Coleta de dados (no Kaggle)
 def get_data(path):
     data = pd.read_csv(path)
+    data['date'] = pd.to_datetime(data['date'])
     return data
 
 # Data Overview
 def show_data(data):
-    st.title('Data overview')
+    st.title('Data Over view')
     st.write(data.head())
+
+
+
 
         # - Agrupar os dados por região (zipcode)
         # - Dentro da cada região, eu vou encontrar a mediana do preço dos imóveis.
-        # - Vou sugerir que os imóveis que estão abaixo do preço mediano de dada região se que estjam em voas condições, sejam comprados.
+        # - Vou sugerir que os imóveis que estão abaixo do preço mediano de dada região se que estejam em boas condições, sejam comprados.
         
         # - Exemplo 
         #     Imóvel Cod | Região  | Preço do Imóvel | Preço da Mediana | Condições | Status
         #        103131  | 3021346 | R$ 451201       | R$ 251354        | 3         | Não Compra
         #        103131  | 3021346 | R$ 151201       | R$ 251354        | 3         | Compra
         #        103131  | 3021346 | R$ 151201       | R$ 251354        | 1         | Não Compra
+def median_price_per_condition_and_zipcode(data):
+    st.title('Median price by zipcode')
+    data_zip = data[['price', 'condition', 'zipcode']].groupby(['condition', 'zipcode']).median().reset_index()
+    st.write(data_zip)
+    return data_zip
+    
+
+def mediam_price_per_condition(data):
+    """
+    mostra a mediana dos preços dos imóveis para cada uma das condições.
+    """
+    st.title('Median price per condition')
+    price_per_condition = data[['price', 'condition']].groupby('condition').median().reset_index()
+    price_per_condition.columns=['condition', 'median_price']
+    fig = px.line(price_per_condition, x = 'condition', y = 'median_price')
+    st.plotly_chart(fig)
+
+
+
+def define_status(data, data_zip):
+    data['median_price'] = 0
+    data['status'] = 'Compra'
+    data['x% lower'] = 'higher'
+    for i in range(len(data_zip)):
+       data.loc[(data['condition'] == data_zip.loc[i ,'condition']) & (data['zipcode'] == data_zip.loc[i, 'zipcode']), 'median_price'] = data_zip.loc[i, 'price']
+       data.loc[(data['condition'] == data_zip.loc[i ,'condition']) & (data['price'] > data_zip.loc[i, 'price']) & (data['zipcode'] == data_zip.loc[i, 'zipcode']), 'status'] = 'Não compra'
+       data]\float(1 - price/)
+        
+    st.write(data[['price','condition', 'median_price', 'status','x% lower']])
 
     # 2 - Uma vez comprado, qual o melhor momento para vender e por qual preço?
         # - Plano 01:
@@ -109,8 +146,16 @@ def show_data(data):
 # Publicação do modelo
 
 if __name__ == '__main__':
+    # Extraction
     path = 'dataset/kc_house_data.csv'
-    show_data(get_data(path))
+    data = get_data(path)
+    show_data(data)
 
+    # Transformation
+    data_zip = median_price_per_condition_and_zipcode(data)
+
+    mediam_price_per_condition(data)
+
+    define_status(data, data_zip)
 
 
