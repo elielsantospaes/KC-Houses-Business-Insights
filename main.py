@@ -29,6 +29,8 @@ st.set_page_config(layout = 'wide')
 
     # 1 - Quais são os imóveis que a House Rocket deveria comprar?
         # - Coleta de dados (no Kaggle)
+st.title('House Rocket Project')
+st.write("The aim of the project is to define the best transactions opportunities within the House Rocket houses protifolium. ")
 def get_data(path):
     data = pd.read_csv(path)
     data['date'] = pd.to_datetime(data['date'])
@@ -36,11 +38,8 @@ def get_data(path):
 
 # Data Overview
 def show_data(data):
-    st.title('Data Over view')
+    st.header('Data Over view')
     st.write(data.head())
-
-
-
 
         # - Agrupar os dados por região (zipcode)
         # - Dentro da cada região, eu vou encontrar a mediana do preço dos imóveis.
@@ -51,35 +50,72 @@ def show_data(data):
         #        103131  | 3021346 | R$ 451201       | R$ 251354        | 3         | Não Compra
         #        103131  | 3021346 | R$ 151201       | R$ 251354        | 3         | Compra
         #        103131  | 3021346 | R$ 151201       | R$ 251354        | 1         | Não Compra
-def median_price_per_condition_and_zipcode(data):
-    st.title('Median price by zipcode')
-    data_zip = data[['price', 'condition', 'zipcode']].groupby(['condition', 'zipcode']).median().reset_index()
-    st.write(data_zip)
-    return data_zip
-    
+  
 
 def mediam_price_per_condition(data):
     """
     mostra a mediana dos preços dos imóveis para cada uma das condições.
     """
-    st.title('Median price per condition')
+    st.header('Median price per condition')
+    st.write('As there are five different house conditions, it is important to know how the prices behaves deppends the houses conditions.')
+    
     price_per_condition = data[['price', 'condition']].groupby('condition').median().reset_index()
     price_per_condition.columns=['condition', 'median_price']
     fig = px.line(price_per_condition, x = 'condition', y = 'median_price')
     st.plotly_chart(fig)
 
+    st.write("As wee can see, the house's price increases with the increse of the house condition. So, the data will be grouped by region (zipcode) and condition.")
 
 
+def median_price_per_condition_and_zipcode(data):
+    data_zip = data[['price', 'condition', 'zipcode']].groupby(['condition', 'zipcode']).median().reset_index()
+    data_zip.columns = ['condition', 'zipcode', 'median_price']
+    return data_zip
+    
 def define_status(data, data_zip):
+    st.header('Defining new features')
+    st.write("Using the grouped data by condidiotn and regions, lets define two new features for the houses:")
+    st.write(" - Status, that defines if a house should be bought")
+    st.write(" - x% lower, that shows how much the house's price is lower the than median price for a given condition and region.")
     data['median_price'] = 0
-    data['status'] = 'Compra'
-    data['x% lower'] = 'higher'
+    data['status'] = 'Buy'
+    data['x% lower'] = 0
     for i in range(len(data_zip)):
-       data.loc[(data['condition'] == data_zip.loc[i ,'condition']) & (data['zipcode'] == data_zip.loc[i, 'zipcode']), 'median_price'] = data_zip.loc[i, 'price']
-       data.loc[(data['condition'] == data_zip.loc[i ,'condition']) & (data['price'] > data_zip.loc[i, 'price']) & (data['zipcode'] == data_zip.loc[i, 'zipcode']), 'status'] = 'Não compra'
-       data]\float(1 - price/)
+       data.loc[(data['condition'] == data_zip.loc[i ,'condition']) & (data['zipcode'] == data_zip.loc[i, 'zipcode']), 'median_price'] = data_zip.loc[i, 'median_price']
+       data.loc[(data['condition'] == data_zip.loc[i ,'condition']) & (data['price'] > data_zip.loc[i, 'median_price']) & (data['zipcode'] == data_zip.loc[i, 'zipcode']), 'status'] = 'Not Buy'
+    
+    data.loc[(data['price'] < data['median_price']), 'x% lower'] = 100*(1 - data['price']/data['median_price'])
+    data['x% lower'] = data['x% lower'].astype(float)
+    data.round({'x% lower': 2})
         
-    st.write(data[['price','condition', 'median_price', 'status','x% lower']])
+    st.header("New features over view.")
+    st.write(data[['price','condition', 'median_price', 'status','x% lower']].head(10))
+    
+
+def best_opportunities(data):
+    best = []
+    for i in range(len(data)):
+        if data.loc[i, 'x% lower'] > 0:
+            best.append(data.loc[i, 'x% lower'])
+
+    best_df = pd.DataFrame({'x% lower': best})
+    
+
+    c1, c2 = st.beta_columns((3,1))
+    with c1:
+        st.header('Distribution of opportunities')
+        st.plotly_chart(px.histogram(best_df, x = 'x% lower', nbins = 60))
+
+    with c2:
+        st.header('Statistical description of opportunities')
+        st.write(best_df.describe())
+
+    st.write(" - There are 10678 houses with price lower than the median prices for a given condition and region.")
+    st.write(" - For these 10k houses, the prices are, in average, about 20% lower than the median prices.")
+    st.write(" - 25% of the houses are considered best opportunities, with prices equal or lower than 20% of the median prices.")
+
+
+     
 
     # 2 - Uma vez comprado, qual o melhor momento para vender e por qual preço?
         # - Plano 01:
@@ -152,10 +188,11 @@ if __name__ == '__main__':
     show_data(data)
 
     # Transformation
-    data_zip = median_price_per_condition_and_zipcode(data)
-
     mediam_price_per_condition(data)
+
+    data_zip = median_price_per_condition_and_zipcode(data)
 
     define_status(data, data_zip)
 
+    best_opportunities(data)
 
