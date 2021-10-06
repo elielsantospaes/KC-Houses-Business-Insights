@@ -38,7 +38,7 @@ def get_data(path):
 
 # Data Overview
 def show_data(data):
-    st.header('Data Over view')
+    st.header('Data Overview')
     st.write(data.head())
 
         # - Agrupar os dados por região (zipcode)
@@ -77,9 +77,11 @@ def define_status(data, data_zip):
     st.write("Using the grouped data by condidiotn and regions, lets define two new features for the houses:")
     st.write(" - Status, that defines if a house should be bought")
     st.write(" - x% lower, that shows how much the house's price is lower the than median price for a given condition and region.")
+    
     data['median_price'] = 0
     data['status'] = 'Buy'
     data['x% lower'] = 0
+    
     for i in range(len(data_zip)):
        data.loc[(data['condition'] == data_zip.loc[i ,'condition']) & (data['zipcode'] == data_zip.loc[i, 'zipcode']), 'median_price'] = data_zip.loc[i, 'median_price']
        data.loc[(data['condition'] == data_zip.loc[i ,'condition']) & (data['price'] > data_zip.loc[i, 'median_price']) & (data['zipcode'] == data_zip.loc[i, 'zipcode']), 'status'] = 'Not Buy'
@@ -93,6 +95,8 @@ def define_status(data, data_zip):
     
 
 def best_opportunities(data):
+    st.header('Mapping best opportunities.')
+    st.write('Applying a filter in the data, takin only houses with status equal buy, lets see the distribution of opportunities, and how these opportunities are the best.')
     best = []
     for i in range(len(data)):
         if data.loc[i, 'x% lower'] > 0:
@@ -110,12 +114,58 @@ def best_opportunities(data):
         st.header('Statistical description of opportunities')
         st.write(best_df.describe())
 
-    st.write(" - There are 10678 houses with price lower than the median prices for a given condition and region.")
-    st.write(" - For these 10k houses, the prices are, in average, about 20% lower than the median prices.")
+    st.write('By the chart and table we can conclude:')
+    st.write('')
+    st.write(" - There are 10678 houses with price lower than the median prices, in total")
+    st.write(" - For these 10k houses, in average, the prices are about 20% lower than the median prices.")
     st.write(" - 25% of the houses are considered best opportunities, with prices equal or lower than 20% of the median prices.")
+    st.write(" - 75% of the houses are with discount lower than 20% and can generate a higher number of profitable transaction.")
+    st.write('')
+    st.write('Based in the above conclusions, the data status will gain a new definition as follow:')
+    st.write(" - If the discont is higher than 20% the status will be changed to Buy_SRP, that means Strongly Recommended Purchase")
+    
+    for i in range(len(data) - 20000): # In the production the 20000 must be deleted.
+        if (data.loc[i, 'x% lower'] > 20):
+            data.loc[i, 'status'] = 'Buy_SRP'
+    
+    st.header('Date overview with new definition')
+
+    st.write(data[['price','condition', 'median_price', 'status','x% lower']].head(10))
 
 
-     
+def set_of_hypothesis(data):
+    st.header('Set of Hypothesis')
+    st.write('Now, lest check a set of hypothesis and see if there are specifics opportunities. All the hypothesis were formulated based on the house features. Regions caracteristics were not considered.')
+
+# Hipóteses:
+    #     É interassante que as hipóteses sejam formuladas após conhecer os atributos dos imóveis.
+    #     Toda Hipótese de negócio precisa ter três características:
+    #         1 - precisa ser uma afirmação
+    #         2 - precisa ser uma comparação entre duas variáveis
+    #         3 - precisa ter um valor definido
+
+    #     H1 - Imóveis que possuem vista para água são 20% mais caros, na média.
+    st.write('H1 - Houses with waterfront are, in average, 20% more expensive.')
+    #     H2 - Imóveis com data de construção menor que 1950, são 50% mais baratos, na média
+    st.write('H2 - Houses with year built lower than 1950 are, in average, 50% cheaper.')
+    #     H3 - Imóveis com porão são 40% mais caros, na media
+    st.write('H3 - Houses with basement are, in average, 40% more expensive.')
+    #     H4 - O crescimento do preço YoY é de 10%
+    st.write('H4 - The YoY price increase is 10%.')
+    #     H5 - Imóveis com mais de um banheiro são 15% mais caros
+    st.write('H5 - House that have more than one bathroom are, in average, 15% more expensive.')
+    #     H6 - Imóveis próximos da água e sem vista para a água são 20% mais baratos, na média.
+    st.write('H6 - houses near to water, but without waterfront, are, in average, 20% cheaper than houses with waterfront')
+    #     H7 - Imóveis térreos são 20% mais caros, na média
+    st.write('H7 - Houses with only one floor are, in average, 20% more expensive.')
+    #     H8 - O preço do imóvel aumenta com o aumenta da área da sala de estar.
+    st.write('H8 - Houses price increase with the increase of the area of livingroom.')
+    #     H9 - Imóveis muito recentes, construção depois de 2010, são 30% mais caros.
+    st.write('H9 - Houses with year built higher than 2010 are, in average, 30% more expensive.')
+    #     H10 - Imóveis com maior área externa são mais 10% mais caros.
+    st.write('H10 - Houses price increase with the increase of the lot area.')
+
+
 
     # 2 - Uma vez comprado, qual o melhor momento para vender e por qual preço?
         # - Plano 01:
@@ -152,23 +202,7 @@ def best_opportunities(data):
     #         - Durante o período de Natal vende-se mais casas do que na páscoa (Descoberta)
     #         - Casas com porão são maiores que casas sem porão (Não acionável)
     
-    # Hipóteses:
-    #     É interassante que as hipóteses sejam formuladas após conhecer os atributos dos imóveis.
-    #     Toda Hipótese de negócio precisa ter três características:
-    #         1 - precisa ser uma afirmação
-    #         2 - precisa ser uma comparação entre duas variáveis
-    #         3 - precisa ter um valor definido
-
-    #     H1 - Imóveis que possuem vista para água são 20% mais caros, na média.
-    #     H2 - Imóveis com data de construção menor que 1950, são 50% mais baratos, na média
-    #     H3 - Imóveis com porão são 40% mais caros, na media
-    #     H4 - O crescimento do preço YoY é de 10%
-    #     H5 - Imóveis com mais de um banheiro são 15% mais caros
-    #     H6 - Imóveis próximos da água e sem vista para a água são 20% mais baratos, na média.
-    #     H7 - Imóveis térreos são 20% mais caros, na média
-    #     H8 - O preço do imóvel aumenta com o aumenta da área de estar.
-    #     H9 - Imóveis muito recentes, construção depois de 2010, são 30% mais caros.
-    #     H10 - Imóveis com maior área externa são mais 10% mais caros.
+    
 
 # Modelagem da dados
 
@@ -196,3 +230,4 @@ if __name__ == '__main__':
 
     best_opportunities(data)
 
+    set_of_hypothesis(data)
