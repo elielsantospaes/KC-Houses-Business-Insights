@@ -4,7 +4,7 @@ from pandas._config.config import set_option
 import numpy as np
 import plotly.express as px
 import streamlit as st
-
+from datetime import datetime
 st.set_page_config(layout = 'wide')
 
 
@@ -167,6 +167,7 @@ def set_of_hypothesis(data):
 
     #     H2 - Imóveis com data de construção menor que 1950, são 50% mais baratos, na média
     st.write('H2 - Houses with year built lower than 1950 are, in average, 50% cheaper.')
+
     # Select data where year built < 1950
     # Take the averaged price per zipcode and condition
     data_very_old = data.loc[data['yr_built'] <1950, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).mean().reset_index()
@@ -188,7 +189,8 @@ def set_of_hypothesis(data):
         
     #     H3 - Imóveis com porão são 40% mais caros, na media
     st.write('H3 - Houses with basement are, in average, 40% more expensive.')
-    # Select data where year built < 1950
+
+    # Select houses with basement
     # Take the averaged price per zipcode and condition
     data_wb = data.loc[data['sqft_basement'] != 0, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).mean().reset_index()
     data_wb.columns = ['condition', 'zipcode', 'avg_price']    
@@ -207,18 +209,35 @@ def set_of_hypothesis(data):
     st.write(" - H3 confirmed")
 
 
-    #     H4 - O crescimento do preço YoY é de 10%
-    st.write('H4 - The YoY price increase is 10%.')
+    #     H4 - O crescimento do preço YoY, for year built, é de 10%, na média.
+    st.write('H4 - The YoY price, for year built, increase, in average, 10%.')
+
+    # Select data where year built < 1950
+    # Take the averaged price per zipcode and condition
+    data_yoy = data[['yr_built', 'price']].groupby('yr_built').mean().reset_index()
+        
+    data_yoy.columns = ['yr_built', 'avg_price']    
+
+    st.plotly_chart(px.bar(data_yoy, x = 'yr_built', y = 'avg_price'))
+        
+    st.write(" - The chart doesn't shows the expected bahaviour of price yoy")
+    st.write(" - H4 refuted")
+
     #     H5 - Imóveis com mais de um banheiro são 15% mais caros
     st.write('H5 - House that have more than one bathroom are, in average, 15% more expensive.')
+
     #     H6 - Imóveis próximos da água e sem vista para a água são 20% mais baratos, na média.
     st.write('H6 - houses near to water, but without waterfront, are, in average, 20% cheaper than houses with waterfront')
+
     #     H7 - Imóveis térreos são 20% mais caros, na média
     st.write('H7 - Houses with only one floor are, in average, 20% more expensive.')
+
     #     H8 - O preço do imóvel aumenta com o aumenta da área da sala de estar.
     st.write('H8 - Houses price increase with the increase of the area of livingroom.')
+
     #     H9 - Imóveis muito recentes, construção depois de 2010, são 30% mais caros.
     st.write('H9 - Houses with year built higher than 2010 are, in average, 30% more expensive.')
+
     #     H10 - Imóveis com maior área externa são mais 10% mais caros.
     st.write('H10 - Houses price increase with the increase of the lot area.')
 
