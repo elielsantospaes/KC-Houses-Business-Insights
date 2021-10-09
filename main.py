@@ -332,7 +332,7 @@ def set_of_hypothesis(data):
     data_wf = data.loc[data['waterfront'] == 1, ['lat', 'long', 'condition', 'zipcode', 'price']]
     data_wf.reset_index(inplace= True)
 
-    data_nwf = data.loc[data['waterfront'] == 0, ['lat', 'long', 'condition', 'zipcode', 'price']]
+    data_nwf = data.loc[(data['waterfront'] == 0) & (data['zipcode'].isin(data_wf['zipcode'].unique())), ['lat', 'long', 'condition', 'zipcode', 'price']]
     data_nwf.reset_index(inplace= True)
 
     waterfront_map = folium.Map(location = [data_wf['lat'].mean(), data_wf['long'].mean()], zoom_start = 10)
@@ -342,11 +342,19 @@ def set_of_hypothesis(data):
         marker = folium.map.Marker(
             coordinate,
             # Create an icon as a text label
-            icon=folium.Icon(color='white', icon_color = 'green')
+            icon=folium.Icon(color='white', icon_color = 'green')           
         )
-    waterfront_map.add_child(marker)
-    
+        waterfront_map.add_child(marker)
 
+    for i in range(len(data_nwf)):
+        coordinate = [data_nwf.loc[i, 'lat'], data_nwf.loc[i, 'long']]
+        marker = folium.map.Marker(
+            coordinate,
+            # Create an icon as a text label
+            icon=folium.Icon(color='white', icon_color = 'blue')           
+        )
+        waterfront_map.add_child(marker)
+    
     folium_static(waterfront_map)
 
 
