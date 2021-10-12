@@ -49,7 +49,7 @@ def calculate_distance(lat1, lon1, lat2, lon2):
 def get_data(path):
     data = pd.read_csv(path)
     data['date'] = pd.to_datetime(data['date'])
-    data['condition'] = data['condition'].astype(str)
+    data['condition'] = data['condition'].astype(str) # to have discrete color distribution in charts
     return data
 
 # Data Overview
@@ -59,23 +59,20 @@ def show_data(data):
     st.write('The data presents 21k houses and each house has 21 features')
 
 def remove_outliers(data, column):
-    # Sort data by column
-    #data.sort_values(column, inplace= True)
-    #data.reset_index(inplace= True)
-    
+        
     # Defining the quartiles
     Q1 = np.quantile(data[column], 0.25, interpolation = 'midpoint')
     # Q2 = np.quantile(data[column], 0.50, interpolation = 'midpoint')
     Q3 = np.quantile(data[column], 0.75, interpolation = 'midpoint') 
     FIQ = Q3 - Q1
     
-    # Removing lowers outlhies
+    # Removing lowers outliers
     data = data.loc[data[column] > ( Q1 - 1.5*FIQ )]
 
     # Removing highers outliers
     data = data.loc[data[column] < ( Q3 + 1.5*FIQ )]
     
-    data.reset_index(inplace= True)
+    data.reset_index(inplace = True)
     data.drop(columns = 'index', axis = 1, inplace= True)
     return data
 
@@ -83,16 +80,27 @@ def mediam_price_per_condition(data):
     """
     mostra a mediana dos preços dos imóveis para cada uma das condições.
     """
+    
     st.header('Median price per condition')
-    st.write('As there are five different house conditions, it is important to know how the prices behaves deppends the houses conditions.')
+    st.write('As there are five different house conditions, it is important to know how the prices behaves deppends the houses conditions and the number of houses per condition.')
     
     price_per_condition = data[['price', 'condition']].groupby('condition').median().reset_index()
     price_per_condition.columns=['condition', 'median_price']
-    fig = px.line(price_per_condition, x = 'condition', y = 'median_price')
-    st.plotly_chart(fig)
+    
+    c1, c2 = st.beta_columns((1,1))
+    with c1:
+        fig = px.line(price_per_condition, x = 'condition', y = 'median_price', title = 'Averaged price per condition')
+        st.plotly_chart(fig)
 
-    st.write("As wee can see, the house's price increases with the increase of the number that represents the house condition, indicating that the highest number the better house condition. So, the data will be grouped by region (zip code) and condition.")
+    condition = data[['id', 'condition']].groupby('condition').count().reset_index()
+    condition.columns = ['condition', 'number of houses per condition']
+    
+    with c2:
+        fig = px.bar(condition, x = 'condition', y = 'number of houses per condition', title = 'Amount of houses per condition')
+        st.plotly_chart(fig)
 
+    st.write("As wee can see, the house's price increases with the increase of the number that represents the house condition, indicating that the highest number the better house condition. The major part of the houses are in condition 3 and 4.") 
+    
 
 def median_price_per_condition_and_zipcode(data):
     data_zip = data[['price', 'condition', 'zipcode']].groupby(['condition', 'zipcode']).median().reset_index()
@@ -164,8 +172,13 @@ def best_opportunities(data):
 
     data.loc[data['status'] != 'Not Buy', 'profit'] = 100*(data['median_price']/data['price'] - 1)
 
-    st.write(' - The averaged profit for the best opportunitires is: %.2f' %data.loc[data['status'] == 'Buy_SRP', 'profit'].mean())
-    st.write(' - The averaged profit for the commum opportunitires is: %.2f' %data.loc[data['status'] == 'Buy', 'profit'].mean())
+    st.write(' - The min profit for the best opportunitires is: %.0f ' %data.loc[data['status'] == 'Buy_SRP', 'profit'].min(),'%')
+    st.write(' - The max profit for the best opportunitires is: %.0f ' %data.loc[data['status'] == 'Buy_SRP', 'profit'].max(),'%')
+    st.write(' - The averaged profit for the best opportunitires is: %.0f ' %data.loc[data['status'] == 'Buy_SRP', 'profit'].mean(),'%')
+
+    st.write(' - The min profit for the commum opportunitires is: %.0f' %data.loc[data['status'] == 'Buy', 'profit'].min(),'%')
+    st.write(' - The max profit for the commum opportunitires is: %.0f' %data.loc[data['status'] == 'Buy', 'profit'].max(),'%')
+    st.write(' - The averaged profit for the commum opportunitires is: %.0f' %data.loc[data['status'] == 'Buy', 'profit'].mean(),'%')
 
 
 
@@ -175,51 +188,52 @@ def set_of_hypothesis(data):
 
     data  = data.copy()
         
-    # H1 = 'Houses with waterfront are, in average, 20% more expensive.'
-    # st.write('H1 - ' + H1)
+    H1 = 'Houses with waterfront are, in average, 20% more expensive.'
+    st.write('H1 - ' + H1)
 
-    # # Select data where the houses have waterfront
-    # # Take the averaged price per zipcode and condition
-    # data_wf = data.loc[data['waterfront'] == 1, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).mean().reset_index()
-    # data_wf.columns = ['condition', 'zipcode', 'avg_price']
+    # Select data where the houses have waterfront
+    # Take the averaged price per zipcode and condition
+    data_wf = data.loc[data['waterfront'] == 1, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).median().reset_index()
+    data_wf.columns = ['condition', 'zipcode', 'median_price']
     
-    # # Select data where the houses haven't waterfront
-    # # Take the averaged price per zipcode and condition
-    # data_nwf = data.loc[data['waterfront'] == 0, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).mean().reset_index()
-    # data_nwf.columns = ['condition', 'zipcode', 'avg_price']    
+    # Select data where the houses haven't waterfront
+    # Take the averaged price per zipcode and condition
+    data_nwf = data.loc[data['waterfront'] == 0, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).median().reset_index()
+    data_nwf.columns = ['condition', 'zipcode', 'median_price']    
 
-    # # Compare the price for houses with the same condition and region
-    # avg_price = []        
-    # for i in range(len(data_wf)):
-    #     for k in range(len(data_nwf)):
-    #         if (data_wf.loc[i,'zipcode'] == data_nwf.loc[k,'zipcode']) & (data_wf.loc[i,'condition'] == data_nwf.loc[k,'condition']):
-    #             avg_price.append(100*(data_wf.loc[i,'avg_price']/data_nwf.loc[k, 'avg_price'] - 1))
+    # Compare the price for houses with the same condition and region
+    median_price = []        
+    for i in range(len(data_wf)):
+        for k in range(len(data_nwf)):
+            if (data_wf.loc[i,'zipcode'] == data_nwf.loc[k,'zipcode']) & (data_wf.loc[i,'condition'] == data_nwf.loc[k,'condition']):
+                median_price.append(100*(data_wf.loc[i,'median_price']/data_nwf.loc[k, 'median_price'] - 1))
 
-    # avg_price_ratio = pd.DataFrame()  
-    # avg_price_ratio['avg_price_ratio'] = avg_price          
-    # avg_price_ratio.dropna(axis = 0, inplace= True)
-    # st.write(" - Value found: %.2f" % avg_price_ratio['avg_price_ratio'].mean(),'%')
-    # st.write(" - H1 confirmed")
-    # st.write('Actilly the prices of houses with waterfront are, in the average, about 87% higher than prices of houses without waterfront.')
-    # st.write('Lets check price distribution for houses with waterfront')
+    median_price_ratio = pd.DataFrame()  
+    median_price_ratio['median_price_ratio'] = median_price          
+    median_price_ratio.dropna(axis = 0, inplace= True)
+    st.write(" - Value found: %.2f" % median_price_ratio['median_price_ratio'].mean(),'%')
+    st.write(" - H1 confirmed")
+    st.write('Actilly the prices of houses with waterfront are, in the average, about 97% higher than prices of houses without waterfront.')
+    st.write('Lets check price distribution for houses with waterfront')
     
-    # st.plotly_chart(px.histogram(data.loc[data['waterfront'] == 1], x = 'price'))
-    # st.write('The recommendation is to buy houses with prices lower %.2f, the the averaged price for houses with waterfront.' %data.loc[data['waterfront'] == 1 ,'price'].mean())
+    st.plotly_chart(px.histogram(data.loc[data['waterfront'] == 1], x = 'price'))
     
-    # avg_profit_wf = pd.DataFrame()
-    # avg_profit = []
-    # data_aux = pd.DataFrame()
-    # data_aux['price'] = data.loc[data['waterfront'] == 1, 'price']
-    # data_aux.reset_index(inplace = True)
-    # data_aux.drop(columns = 'index', inplace = True)
+    st.write('The recommendation is to buy houses with prices lower %.2f, the the median price for houses with waterfront.' %data.loc[data['waterfront'] == 1 ,'price'].median())
+    
+    avg_profit_wf = pd.DataFrame()
+    avg_profit = []
+    data_aux = pd.DataFrame()
+    data_aux['price'] = data.loc[data['waterfront'] == 1, 'price']
+    data_aux.reset_index(inplace = True)
+    data_aux.drop(columns = 'index', inplace = True)
        
-    # for i in range(len(data_aux)):
-    #     if data_aux.loc[i, 'price'] < data.loc[data['waterfront'] == 1, 'price'].mean():
-    #         avg_profit.append(100*(data.loc[data['waterfront'] == 1, 'price'].mean()/data_aux.loc[i,'price'] - 1))
+    for i in range(len(data_aux)):
+        if data_aux.loc[i, 'price'] < data.loc[data['waterfront'] == 1, 'price'].mean():
+            avg_profit.append(100*(data.loc[data['waterfront'] == 1, 'price'].mean()/data_aux.loc[i,'price'] - 1))
     
-    # avg_profit_wf['profit'] = avg_profit
-    # st.write('Solding the houses for the averaged price, the potential profit is, in average, %.2f.' %avg_profit_wf['profit'].mean())
-    # avg_price.clear()    
+    avg_profit_wf['profit'] = avg_profit
+    st.write('Solding the houses for the median price, the potential profit is, in average, %.2f.' %avg_profit_wf['profit'].mean())
+    
 
 
 
@@ -229,12 +243,12 @@ def set_of_hypothesis(data):
 
     # # Select data where year built < 1950
     # # Take the averaged price per zipcode and condition
-    # data_very_old = data.loc[data['yr_built'] <1950, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).mean().reset_index()
+    # data_very_old = data.loc[data['yr_built'] <1950, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).median().reset_index()
     # data_very_old.columns = ['condition', 'zipcode', 'avg_price']    
 
     # # Select data where year built >= 1950
     # # Take the averaged price per zipcode and condition
-    # data_not_too_old = data.loc[data['yr_built'] >= 1950, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).mean().reset_index()
+    # data_not_too_old = data.loc[data['yr_built'] >= 1950, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).median().reset_index()
     # data_not_too_old.columns = ['condition', 'zipcode', 'avg_price']    
     
     # # Compare the price for houses with the same condition and region
@@ -258,12 +272,12 @@ def set_of_hypothesis(data):
 
     # # Select houses with basement
     # # Take the averaged price per zipcode and condition
-    # data_wb = data.loc[data['sqft_basement'] != 0, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).mean().reset_index()
+    # data_wb = data.loc[data['sqft_basement'] != 0, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).median().reset_index()
     # data_wb.columns = ['condition', 'zipcode', 'avg_price']    
 
     # # Select houses without basement
     # # Take the averaged price per zipcode and condition
-    # data_nwb = data.loc[data['sqft_basement'] == 0, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).mean().reset_index()
+    # data_nwb = data.loc[data['sqft_basement'] == 0, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).median().reset_index()
     # data_nwb.columns = ['condition', 'zipcode', 'avg_price']    
     
     # avg_price.clear()
@@ -285,7 +299,7 @@ def set_of_hypothesis(data):
     # st.write('H4 - ' + H4)
     
     # # Select data grouped by condition, zipcode and year built
-    # data_yoy = data[['condition', 'zipcode','yr_built', 'price']].groupby(['condition', 'zipcode','yr_built']).mean().reset_index()
+    # data_yoy = data[['condition', 'zipcode','yr_built', 'price']].groupby(['condition', 'zipcode','yr_built']).median().reset_index()
     # data_yoy.columns = ['condition', 'zipcode','yr_built', 'avg_price']
     
     # # Sort data by year built
@@ -324,12 +338,12 @@ def set_of_hypothesis(data):
     
     # # Select houses with one bathroom
     # # Take the averaged price per zipcode and condition
-    # data_onebathroom = data.loc[data['bathrooms'] <= 1, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).mean().reset_index()
+    # data_onebathroom = data.loc[data['bathrooms'] <= 1, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).median().reset_index()
     # data_onebathroom.columns = ['condition', 'zipcode', 'avg_price']    
 
     # # Select houses with more than one bathroom
     # # Take the averaged price per zipcode and condition
-    # data_m_onebathrooms = data.loc[data['bathrooms'] > 1, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).mean().reset_index()
+    # data_m_onebathrooms = data.loc[data['bathrooms'] > 1, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).median().reset_index()
     # data_m_onebathrooms.columns = ['condition', 'zipcode', 'avg_price']    
     
     # avg_price = []
@@ -346,10 +360,24 @@ def set_of_hypothesis(data):
     # avg_price.clear()
 
     # st.write('Houses with more than one bathrooms are, in average, about 44% more expensive')
+    # st.write('Lets see how many houses there are in the portifolio for each amount of bathrooms.')
 
+    # bathrooms = data['bathrooms'].unique().tolist()
+    # bath_count = pd.DataFrame()
+    # count = []
+    # for bathroom in bathrooms:        
+    #    count.append(data.loc[data['bathrooms'] == bathroom, 'bathrooms'].count())
+        
+    # bath_count['bathrooms'] = bathrooms
+    # bath_count['count'] = count    
+    # fig = px.bar(bath_count, x = 'bathrooms', y = 'count')
+    # st.plotly_chart(fig)
     
-    # #     H6 - Imóveis próximos da água e sem vista para a água são 20% mais baratos, na média.
-    # st.write('H6 - houses near to water, but without waterfront, are, in average, 20% cheaper than houses with waterfront')
+    # st.write('From the chart, we can see that the amount of houses where the number of bathrooms is higher or equal 1 and less or equal than 2.25 represents the major part of the houses. That indicate people prefere these houses. So the recommendation is to buy this kind of houses, due to will easier to trade.')
+
+
+    # H6 = 'houses near to water, but without waterfront, are, in average, 20% cheaper than houses with waterfront.'
+    # st.write('H6 - ' + H6)
 
     # # Select zipcode of houses with waterfront
     # # Select houses without waterfront
@@ -401,12 +429,12 @@ def set_of_hypothesis(data):
     
     # # Select houses with one floor
     # # Take the averaged price per zipcode and condition
-    # data_one_floor = data.loc[data['floors'] == 1, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).mean().reset_index()
+    # data_one_floor = data.loc[data['floors'] == 1, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).median().reset_index()
     # data_one_floor.columns = ['condition', 'zipcode', 'avg_price']    
 
     # # Select houses with more than one floor
     # # Take the averaged price per zipcode and condition
-    # data_m_one_floors = data.loc[data['floors'] > 1, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).mean().reset_index()
+    # data_m_one_floors = data.loc[data['floors'] > 1, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).median().reset_index()
     # data_m_one_floors.columns = ['condition', 'zipcode', 'avg_price']    
     
     # avg_price = []
@@ -426,32 +454,43 @@ def set_of_hypothesis(data):
     # st.write('Actilly, houses with more than one floor are more expensive tha houses with only one floor.')
 
 
-    #     H8 - O preço do imóvel aumenta com o aumenta da área da sala de estar.
-    st.write('H8 - Houses price increase with the increase of the livingroom area.')
+    # H8 = 'H8 - Houses price increase with the increase of the livingroom area.'
+    # st.write('H8 - ' + H8)
 
-    # Plot the houses price accross livingroom area.
-    data.sort_values('sqft_living', inplace= True)
-    fig = px.scatter(data, x = 'sqft_living', y = 'price', size = data['price'], color = data['condition'], trendline = 'ols', trendline_scope = 'overall', trendline_color_override = 'red')
-    st.plotly_chart(fig)
-    st.write(" - H8 confirmed")
-    st.write('From the chart we can see some houses with good condition, 3 and 4, below to trendline. That are good transactions opportunities')
+    # # Plot the houses price accross livingroom area.
+    # data.sort_values('sqft_living', inplace= True)
+    # fig = px.scatter(data, x = 'sqft_living', y = 'price', size = data['price'], color = data['condition'], trendline = 'ols', trendline_scope = 'overall', trendline_color_override = 'red')
+    # st.plotly_chart(fig)
+    # st.write(" - H8 confirmed")
     
-    results = px.get_trendline_results(fig)
-    results = results.iloc[0]['px_fit_results'].summary()
-    st.write(results)
+    # st.write('From the chart we can see houses with good condition, 3 and 4, below to trendline. That are good transactions opportunities')                    
+
+    # results = px.get_trendline_results(fig)
+    # results = results.iloc[0]['px_fit_results'].summary()
+    # st.write(results)
+
+    # trade = []
+    # for i in range(len(data)):
+    #     if ((data.loc[i, 'condition'] == str(3)) | (data.loc[i, 'condition'] == str(4))):
+    #         if(data.loc[i, 'price'] < (data.loc[i,'sqft_living']*167.3602 + 146400)):
+    #             trade.append(100*((data.loc[i,'sqft_living']*167.3602 + 146400)/data.loc[i, 'price'] - 1))
+
     
     
-    # #     H9 - Imóveis muito recentes, construção depois de 2010, são 30% mais caros, na média.
-    # st.write('H9 - Houses with year built higher than 2010 are, in average, 30% more expensive.')
+    # st.write('Buying houses with price below of te trend line and sold for the value of the trend lines can return a average profit up to %.0f' %(sum(trade)/len(trade)), '%')
+        
+    
+    # H9 = 'Houses with year built higher than 2010 are, in average, 30% more expensive.'
+    # st.write('H9 - ' + H9)
     
     # # Select data with year built higher than 2010.
     # # Group the data by condition and zipcode 
-    # data_new_houses = data.loc[data['yr_built'] >= 2010, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).mean().reset_index()
+    # data_new_houses = data.loc[data['yr_built'] >= 2010, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).median().reset_index()
     # data_new_houses.columns = ['condition', 'zipcode', 'avg_price']
     
     # # Select data with year built lower than 2010.
     # # Group the data by condition and zipcode 
-    # data_old_houses = data.loc[data['yr_built'] < 2010, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).mean().reset_index()
+    # data_old_houses = data.loc[data['yr_built'] < 2010, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).median().reset_index()
     # data_old_houses.columns = ['condition', 'zipcode', 'avg_price']
     
     # avg_price = []
@@ -464,7 +503,7 @@ def set_of_hypothesis(data):
     # avg_price_ratio.dropna(axis = 0, inplace= True)
     # st.write('Value found: %.2f' % avg_price_ratio['avg_price_ratio'].mean(),'%')
     # st.write('H9 refuted')
-    # st.write('Besides the hypothesis was refuted, there are opportunities to be considered, once the avg_prices, for houses built after 2010, are about 24% higher than avg_price for houses built before 2010. Lets visualize and try to understand it.')
+    # st.write('Besides the hypothesis was refuted, there are opportunities to be considered, once the averaged prices, for houses built after 2010, are about 24% higher than averaged price for houses built before 2010. Lets visualize it.')
      
     # st.plotly_chart(
     #     px.scatter(
@@ -477,10 +516,19 @@ def set_of_hypothesis(data):
     #     )
     # )
         
-    # st.write("From the chart is possible see that the condition of house built after 2010 are in major 3, but the prices are higher than the price of houses built before 2010, even with better condition.")
+    # st.write("From the chart is possible see that the condition of house built after 2010 are in major 3, but the prices of these houses can be higher than the price of houses built before 2010, even with better condition.")
+    # avg_2010 =  data.loc[data['yr_built'] >= 2010, 'price'].median()
+    # good_price_2010 = data.loc[(data['yr_built'] >= 2010) & (data['price'] < avg_2010), 'price'].reset_index()
+            
+    # trade = []
+    # for i in range(len(good_price_2010)):
+    #     trade.append(100*(avg_2010/good_price_2010.loc[i, 'price'] - 1))
+           
+    # st.write('Houses built from 2010 and so on, can be traded with averaged profit up to %.0f' %(sum(trade)/len(trade)), '%')
 
-    # #     H10 - Imóveis com maior área externa são 10% mais caros, na média.
-    # st.write('H10 - Houses price increase with the increase of the lot area.')
+
+    # H10 = 'Houses price increase with the increase of the lot area.'
+    # st.write('H10 - ' + H10)
     # data.sort_values('sqft_lot', inplace= True)
     # st.plotly_chart(px.scatter(data, x = 'sqft_lot', y = 'price', size = 'price', color = 'condition'))
     # st.write(" - H10 refuted")
