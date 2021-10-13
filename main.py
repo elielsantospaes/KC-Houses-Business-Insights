@@ -168,10 +168,10 @@ def best_opportunities(data):
     
 
     st.header('Profit Evaluation')
-    st.write('Estimating the profit, considering the houses should be bought by the median price')
+    st.write('Estimating the profit, considering the houses will should be bought by the median price')
 
     data.loc[data['status'] != 'Not Buy', 'profit'] = 100*(data['median_price']/data['price'] - 1)
-
+    
     st.write(' - The min profit for the best opportunitires is: %.0f ' %data.loc[data['status'] == 'Buy_SRP', 'profit'].min(),'%')
     st.write(' - The max profit for the best opportunitires is: %.0f ' %data.loc[data['status'] == 'Buy_SRP', 'profit'].max(),'%')
     st.write(' - The averaged profit for the best opportunitires is: %.0f ' %data.loc[data['status'] == 'Buy_SRP', 'profit'].mean(),'%')
