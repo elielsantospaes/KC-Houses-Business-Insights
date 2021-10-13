@@ -81,8 +81,8 @@ def mediam_price_per_condition(data):
     mostra a mediana dos preços dos imóveis para cada uma das condições.
     """
     
-    st.header('Median price per condition')
-    st.write('As there are five different house conditions, it is important to know how the prices behaves deppends the houses conditions and the number of houses per condition.')
+    st.subheader('Median price per condition')
+    st.write('As there are five different house conditions, it is important to know how the prices behaves deppends the houses conditions and the number of houses per condition. Lets visualize that.')
     
     price_per_condition = data[['price', 'condition']].groupby('condition').median().reset_index()
     price_per_condition.columns=['condition', 'median_price']
@@ -90,6 +90,12 @@ def mediam_price_per_condition(data):
     c1, c2 = st.beta_columns((1,1))
     with c1:
         fig = px.line(price_per_condition, x = 'condition', y = 'median_price', title = 'Averaged price per condition')
+        fig.update_layout(
+            font_size = 20,
+            title = "Houses price as function of houses condition",
+            xaxis_title = 'Houses condition',
+            yaxis_title = 'Media price (USD)'            
+        )
         st.plotly_chart(fig)
 
     condition = data[['id', 'condition']].groupby('condition').count().reset_index()
@@ -97,6 +103,12 @@ def mediam_price_per_condition(data):
     
     with c2:
         fig = px.bar(condition, x = 'condition', y = 'number of houses per condition', title = 'Amount of houses per condition')
+        fig.update_layout(
+            font_size = 20,
+            title = "Number of houses per houses condition",
+            xaxis_title = 'Houses condition',
+            yaxis_title = 'Number of houses'            
+        )
         st.plotly_chart(fig)
 
     st.write("As wee can see, the house's price increases with the increase of the number that represents the house condition, indicating that the highest number the better house condition. The major part of the houses are in condition 3 and 4.") 
@@ -111,7 +123,7 @@ def define_status(data, data_zip):
     st.header('Defining new features')
     st.write("Using the grouped data by condition and regions, lets define two new features for the houses:")
     st.write(" - Status, that defines if a house should be bought or not. One house should be bought if the house price is lower than the median price for houses in the same condition and region.")
-    st.write(" - x% lower, that shows how much the house's price is lower the than median price for a given condition and region.")
+    st.write(" - x% lower, that shows the discount, in other words, how much the house's price is lower the than median price for a given condition and region.")
     
     data['median_price'] = 0
     data['status'] = 'Buy'
@@ -142,7 +154,14 @@ def best_opportunities(data):
     c1, c2 = st.beta_columns((3,1))
     with c1:
         st.header('Distribution of opportunities')
-        st.plotly_chart(px.histogram(best_df, x = 'x% lower', nbins = 60))
+        fig = px.histogram(best_df, x = 'x% lower', nbins = 60)
+        fig.update_layout(
+            font_size = 20,
+            title = "Discount distribution.",
+            xaxis_title = 'Discount (%)',
+            yaxis_title = 'Number of houses'            
+        )
+        st.plotly_chart(fig)
 
     with c2:
         st.header('Statistical description of opportunities')
@@ -168,7 +187,9 @@ def best_opportunities(data):
     
 
     st.header('Profit Evaluation')
-    st.write('Estimating the profit, considering the houses will should be bought by the median price')
+    st.write('Estimating the profit, considering the houses should be sold by the median price')
+    st.subheader('First approach')
+    st.write('In the first approach a general view of the houses was done and all houses with price bellow the median price was considered a trade opportunitie.')
 
     data.loc[data['status'] != 'Not Buy', 'profit'] = 100*(data['median_price']/data['price'] - 1)
     
