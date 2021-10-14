@@ -3,6 +3,7 @@
         "astype",
         "inplace",
         "Kaggle",
-        "quantile"
+        "quantile",
+        "tolist"
     ]
 }
