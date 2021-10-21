@@ -77,6 +77,39 @@ def remove_outliers(data, column):
     data.drop(columns = 'index', axis = 1, inplace= True)
     return data
 
+def show_profit_estimation(data):
+    data['estimate_profit%'] = data['estimate_profit%'].astype(float)
+    st.write('Profit estimation')
+    st.write('Minimal estimated profit, %.1f' %data['estimate_profit%'].min(),'%')
+    st.write('Maximum estimated profit, %.1f' %data['estimate_profit%'].max(),'%')
+    st.write('Maximum estimated profit, %.1f' %data['estimate_profit%'].mean(),'%')
+
+def take_houses(data, house_data,H):
+    sample = pd.DataFrame()
+    data_aux = pd.DataFrame()
+    for dado in house_data:
+        data_aux = data.loc[data['id'] == dado[3]]
+        sample = pd.concat([sample, data_aux])
+        
+    print('Este é o tamnho da amostra = ',len(sample))
+    sample.drop_duplicates(inplace = True)
+    print('Este é o tamnho da amostra = ',len(sample))
+    sample.reset_index(inplace = True)
+    for i in range(len(sample)):
+        for dado in house_data:
+            if sample.loc[i, 'id'] == dado[3]:
+                sample.loc[i,'median_price'] = dado[2]
+                sample.loc[i,'estimate_profit'] = dado[0]
+                sample.loc[i,'estimate_profit%'] = '%.1f' %dado[1]
+                sample.loc[i,'x%_lower'] = '%.1f' %(100*(1 - (sample.loc[i,'price']/dado[2])))
+            
+            
+    sample.dropna(axis = 0, inplace = True)
+    sample.reset_index(inplace = True)
+    sample['hypothesis'] = H
+    sample.drop(['index'], axis = 1, inplace = True)
+    return sample
+
 def mediam_price_per_condition(data):
     """
     mostra a mediana dos preços dos imóveis para cada uma das condições.
@@ -134,12 +167,18 @@ def define_status(data, data_zip):
        data.loc[(data['condition'] == data_zip.loc[i ,'condition']) & (data['zipcode'] == data_zip.loc[i, 'zipcode']), 'median_price'] = data_zip.loc[i, 'median_price']
        data.loc[(data['condition'] == data_zip.loc[i ,'condition']) & (data['price'] > data_zip.loc[i, 'median_price']) & (data['zipcode'] == data_zip.loc[i, 'zipcode']), 'status'] = 'Not Buy'
     
+    for i in range(len(data_zip)):
+        data.loc[(data['condition'] == data_zip.loc[i ,'condition']) & (data['zipcode'] == data_zip.loc[i, 'zipcode']), 'estimate_profit'] = data_zip.loc[i, 'median_price'] - data['price']
+        data.loc[(data['condition'] == data_zip.loc[i ,'condition']) & (data['zipcode'] == data_zip.loc[i, 'zipcode']), 'estimate_profit%'] = 100*(data_zip.loc[i, 'median_price']/data['price'] - 1)
+    
     data.loc[(data['price'] < data['median_price']), 'x% lower'] = 100*(1 - data['price']/data['median_price'])
     data['x% lower'] = data['x% lower'].astype(float)
     data.round({'x% lower': 2})
         
     st.header("New features over view.")
-    st.write(data[['price','condition', 'median_price', 'status','x% lower']].head(10))
+    
+    
+    st.write(data[['price', 'median_price', 'estimate_profit','estimate_profit%','x% lower', 'status']].head(10))
     
 def best_opportunities(data):
     st.header('Mapping the best opportunities.')
@@ -182,27 +221,27 @@ def best_opportunities(data):
             data.loc[i, 'status'] = 'Buy_SRP'
     
     st.header('Date overview with new definition')
-
-    st.write(data[['price','condition', 'median_price', 'status','x% lower']].head(10))
-
-    
+    st.write(data[data['x% lower'] > 0][['price', 'median_price', 'estimate_profit','estimate_profit%','x% lower', 'status']].head(10))
 
     st.header('Profit Evaluation')
     st.write('Estimating the profit, considering the houses should be sold by the median price')
     st.subheader('First approach')
-    st.write('In the first approach a general view of the houses was done and all houses with price bellow the median price was considered a trade opportunitie.')
-
-    data.loc[data['status'] != 'Not Buy', 'profit'] = 100*(data['median_price']/data['price'] - 1)
+    st.write(str(data.loc[data['status'] == 'Buy_SRP', 'id'].count()), ' houses found for the best opportunities.')
     
-    st.write(' - The min profit for the best opportunitires is: %.0f ' %data.loc[data['status'] == 'Buy_SRP', 'profit'].min(),'%')
-    st.write(' - The max profit for the best opportunitires is: %.0f ' %data.loc[data['status'] == 'Buy_SRP', 'profit'].max(),'%')
-    st.write(' - The averaged profit for the best opportunitires is: %.0f ' %data.loc[data['status'] == 'Buy_SRP', 'profit'].mean(),'%')
+    st.write('In the first approach a general view of the houses was done and all houses with price bellow the median price was considered a trade opportunitie.')
+    st.write(' - The min profit for the best opportunitires is: %.0f ' %data.loc[data['status'] == 'Buy_SRP', 'estimate_profit%'].min(),'%')
+    st.write(' - The max profit for the best opportunitires is: %.0f ' %data.loc[data['status'] == 'Buy_SRP', 'estimate_profit%'].max(),'%')
+    st.write(' - The averaged profit for the best opportunitires is: %.0f ' %data.loc[data['status'] == 'Buy_SRP', 'estimate_profit%'].mean(),'%')
 
-    st.write(' - The min profit for the commum opportunitires is: %.0f' %data.loc[data['status'] == 'Buy', 'profit'].min(),'%')
-    st.write(' - The max profit for the commum opportunitires is: %.0f' %data.loc[data['status'] == 'Buy', 'profit'].max(),'%')
-    st.write(' - The averaged profit for the commum opportunitires is: %.0f' %data.loc[data['status'] == 'Buy', 'profit'].mean(),'%')
+    st.write(str(data.loc[data['status'] == 'Buy', 'id'].count()), ' houses found for the regular opportunities.')
+    st.write(' - The min profit for the commum opportunitires is: %.0f' %data.loc[data['status'] == 'Buy', 'estimate_profit%'].min(),'%')
+    st.write(' - The max profit for the commum opportunitires is: %.0f' %data.loc[data['status'] == 'Buy', 'estimate_profit%'].max(),'%')
+    st.write(' - The averaged profit for the commum opportunitires is: %.0f' %data.loc[data['status'] == 'Buy', 'estimate_profit%'].mean(),'%')
 
-
+    sample_general = data.loc[(data['status'] != 'Not Buy') & (data['x% lower'] != 0)].reset_index()
+    sample_general.drop('index', axis = 1, inplace = True)
+    sample_general.sort_values('estimate_profit%', ascending = False, inplace = True)
+    sample_general.to_csv('dataset/sample_general.csv')
 
 def set_of_hypothesis(data):
     st.header('Set of Hypothesis')
@@ -211,33 +250,30 @@ def set_of_hypothesis(data):
     data  = data.copy()
         
     H1 = 'Houses with waterfront are, in average, 20% more expensive.'
-    st.subheader('H1 - ' + H1)
+    st.write('H1 - ' + H1)
 
     # Select data where the houses have waterfront
     # Take the averaged price per zipcode and condition
     data_wf = data.loc[data['waterfront'] == 1, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).median().reset_index()
     data_wf.columns = ['condition', 'zipcode', 'median_price']
-    
+
     # Select data where the houses haven't waterfront
     # Take the averaged price per zipcode and condition
     data_nwf = data.loc[data['waterfront'] == 0, ['condition', 'zipcode', 'price']].groupby(['condition', 'zipcode']).median().reset_index()
-    data_nwf.columns = ['condition', 'zipcode', 'median_price']    
+    data_nwf.columns = ['condition', 'zipcode', 'median_price']
 
     # Compare the price for houses with the same condition and region
-    median_price = []        
+    diff_price = np.array([])
     for i in range(len(data_wf)):
         for k in range(len(data_nwf)):
             if (data_wf.loc[i,'zipcode'] == data_nwf.loc[k,'zipcode']) & (data_wf.loc[i,'condition'] == data_nwf.loc[k,'condition']):
-                median_price.append(100*(data_wf.loc[i,'median_price']/data_nwf.loc[k, 'median_price'] - 1))
+                diff_price = np.append(diff_price, 100*(data_wf.loc[i,'median_price']/data_nwf.loc[k, 'median_price'] - 1))
 
-    median_price_ratio = pd.DataFrame()  
-    median_price_ratio['median_price_ratio'] = median_price          
-    median_price_ratio.dropna(axis = 0, inplace= True)
-    st.write(" - Value found: %.1f" % median_price_ratio['median_price_ratio'].mean(),'%')
+    st.write(" - Value found: %.1f" %(sum(diff_price)/len(diff_price)),'%')
     st.write(" - H1 confirmed")
     st.write('Actilly the prices of houses with waterfront are, in the average, about 97% higher than prices of houses without waterfront.')
     st.write('Lets check price distribution for houses with waterfront')
-    
+
     data_aux = data.loc[data['waterfront'] == 1]
     fig = px.histogram(data_aux, x = 'price')
     fig.update_layout(
@@ -249,25 +285,17 @@ def set_of_hypothesis(data):
     st.plotly_chart(fig)
 
     st.write('The recommendation is to buy houses with prices lower %.1f, the the median price for houses with waterfront.' %data.loc[data['waterfront'] == 1 ,'price'].median())
-    
-    avg_profit_wf = pd.DataFrame()
+
     data_aux.reset_index(inplace = True)
-    data_aux.drop(columns = 'index', inplace = True)
-       
-    median_price = []        
-    sample_index = np.array([])
+    data_aux.drop(columns = 'index', inplace = True)   
+    house_data = []
     for i in range(len(data_wf)):
         for k in range(len(data_aux)):
             if (data_wf.loc[i, 'median_price'] > data_aux.loc[k, 'price']) & (data_wf.loc[i,'zipcode'] == data_aux.loc[k,'zipcode']) & (data_wf.loc[i,'condition'] == data_aux.loc[k,'condition']):
-                median_price.append(100*(data_wf.loc[i,'median_price']/data_aux.loc[k, 'price'] - 1))
-                sample_index = sample_index.append([k])
-    
+                house_data.append([(data_wf.loc[i,'median_price'] - data_aux.loc[k, 'price']),100*(data_wf.loc[i,'median_price']/data_aux.loc[k, 'price'] - 1), data_wf.loc[i, 'median_price'],data_aux.loc[k, 'id']])
 
-    st.subheader('Profit estimation')    
-    avg_profit_wf['profit'] = median_price
-    st.write('Minimal estimated profit, %.1f' %avg_profit_wf['profit'].min(),'%')
-    st.write('Maximum estimated profit, %.1f' %avg_profit_wf['profit'].max(),'%')
-    st.write('Averaged estimated profit, %.1f' %avg_profit_wf['profit'].mean(),'%')
+    sample_h1 = take_houses(data, house_data,'H1')
+    show_profit_estimation(sample_h1)   
     
 
     # H2 = 'Houses with year built lower than 1950 are, in average, 20% cheaper.'
@@ -436,7 +464,7 @@ def set_of_hypothesis(data):
     # st.write('Maximum estimated profit, %.1f' %avg_profit_m_one_bathroom['profit'].max(),'%')
     # st.write('Averaged estimated profit, %.1f' %avg_profit_m_one_bathroom['profit'].mean(),'%')
 
-    # H6 = 'houses near to water, but without waterfront, are, in average, 20% cheaper than houses with waterfront.'
+    # H6 = 'Houses near to water, but without waterfront, are, in average, 20% cheaper than houses with waterfront.'
     # st.write('H6 - ' + H6)
 
     # # Select zipcode of houses with waterfront
@@ -524,7 +552,7 @@ def set_of_hypothesis(data):
     #     font_size = 20,
     #     title = 'Price trend as function of living room area',
     #     xaxis_title = 'Living room arear (sqft)',
-    #     yaxis_title = 'Houses prices'
+    #     yaxis_title = 'Houses prices (USD)'
     # )
 
     # st.plotly_chart(fig)
