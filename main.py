@@ -1,15 +1,9 @@
 import pandas as pd
 import os
-from pandas._config.config import set_option
 import numpy as np
+import plotly
 import plotly.express as px
 import streamlit as st
-from datetime import datetime
-import folium
-from folium.plugins import MarkerCluster
-from streamlit_folium import folium_static
-import statsmodels
-from math import sin, cos, sqrt, atan2, radians
 st.set_page_config(layout = 'wide')
 
 
