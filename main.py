@@ -24,9 +24,9 @@ def select_data():
     
 @st.cache(allow_output_mutation= True)
 def min_max(data, feature):
-    min_ = float(data[feature].min())
-    max_ = float(data[feature].max())
-    avg = data[feature].mean()
+    min_ = int(data[feature].min())
+    max_ = int(data[feature].max())
+    avg = int(data[feature].mean())
     return [min_, max_, avg]
 
 
