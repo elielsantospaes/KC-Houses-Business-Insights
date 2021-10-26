@@ -35,7 +35,37 @@ As there are five different house conditions, it is important to know how the pr
  
  ![image](https://user-images.githubusercontent.com/80731935/138779610-b38e2bd6-10e9-4e35-9afc-1c424ca16510.png)
  
- ### Profit Estimatin for the first approach.
+<p style = "text-align: justify">As wee can see, the house's price increases with the increase of the number that represents the house condition, indicating that the highest number the better house condition. </p>
+The most part of the houses are in the condition 3 and 4, being 65% of houses in condition 3 and 26% in condition 4 </br>
 
-**Table 2:** Results of the donfirmed hypothesis.
+
+### Profit Estimatin for the first approach.
+Using the grouped data by condition and regions, lets define two new features for the houses:</br>
+**Status:** that defines if a house should be bought or not. 
+**x% lower:** that shows the discount, in other words, how much the house's price is lower the than median price for a given condition and region.
+Looking fot houses with status Buy let's visualize the dsicount distribution.
+![image](https://user-images.githubusercontent.com/80731935/138861035-1f2f9f4f-64fb-4dab-bd9f-9a99a48ecfdf.png)
+
+By the chart and the table we can conclude:</br>
+    • There are 10113 houses with price lower than the median prices.</br>
+    • For these 10113 houses, in average, the prices are about 19% lower than the median prices, for a given region and condition.</br>
+    • 25% of the houses are with prices equal or lower than 27% of the median prices.</br>
+      
+Based in the above conclusions, the data status will gain a new definition as follow:</br>
+    • If the discount is 27% or higher, the status will be changed to Buy_SRP, that means Strongly Recommended Purchase.</br>
+    • The set of houses out of the set of best opportunities, was called regular opportunities.</br>
+    
+The profit estimation was done with two sets of data: the best opportunities and regular opportunities.See bolow the averaged profit estimation for each case.
+
+**Profit estimation**</br>
+**Regular opportunities:</br>**
+Averaged estimated profit = 15%</br></br>
+**Best opportunities:</br>**
+Averaged  estimated profit = 65%</br></br>
+
+### Profit Estimatin for the second approach.
+Now, let’s check the set of hypothesis. The aim of these hypothesis is to refine the analysis and try to find specific high profitable opportunities.
+The table ahead shows the retsults for the validated hypothesis. (The complete analysis and conclusion for each hypothesis see the Jupyter Notebook KC_Houses.iýnb and the report KC_Houses_Business_Insights.pdf)
+
+**Table 2:** Results of the donfirmed hypothesis.</br>
  ![image](https://user-images.githubusercontent.com/80731935/138780033-3a1760d3-0367-4c2b-96e1-daf8ea46356d.png)
