@@ -1,6 +1,7 @@
 
 # KC Houses Business Insights
-Projeto de insights sobre compra e venda de imóveis de modo a maximizar os lucros nas operações.
+Insights projct to help in the purchase houses dicision. <\br>
+EDA + Short Report. To see complete analysis and report check the files : KC_Houses.iýnb and KC_Houses_Business_Insights.pdf
 
 ## Abstract
 <p style = "text-align: Justify">
@@ -8,16 +9,17 @@ The aim of the project is to define the best transactions opportunities within t
 <p>
  
  ## Tabel of Contents
+ ![image](https://user-images.githubusercontent.com/80731935/138963852-3c5eb017-478f-4f0a-a01d-326684a58f35.png)
+
 
 ## 1. Introduction
+From the historical data of houses sold between may 2014 and may 2015 in King County Washington State, USA, a data set was built and provide the information for this work. By help decision of houses buying process can improve the profit. So, this project intent to help in that decision.
+ 
+## 2. Problem statement
+The aim of this project is to generate insights to help in decision of house acquisition and or trade based on statistic variation of prices and houses features.
 
-### Business understanding.
-The buy and sold houses has been made by companies 
-A dateset with a historical houses sold between May 2014 to May 2015 in King County, Washington State, USA, was used. 
-We will predict the sales of houses in King County with an accuracy of at least 75-80% and understand which factors are responsible for higher property value - $650K and above.”
 
-
-  ## 2 . Methodology
+ ## 3 . Methodology
 Was adopted a criterion to defines a trade opportunities as following: the trade opportunities are all the houses that have the price lower than the median price, attending the premise ahead:
   
 ### Premises and assumptions:
@@ -86,7 +88,7 @@ Considering the definition of profit estimation, houses with water front present
 Houses built after 2010, are in condition 3, but the price can be higher than houses built before, even in better condition. Buying houses built after 2010, can create good and profitable opportunities.
 
 ## 6. Next Steps
-To compare the approach of median price with the averaged price for the profit estimation.
-Create prediction models for help in the decision of house to be bought.
-Create a prediction models for help to find the best moment to buy the houses.
+To compare the approach of median price with the averaged price for the profit estimation.</br>
+Create prediction models for help in the decision of house to be bought.</br>
+Create a prediction models for help to find the best moment to buy the houses.</br>
  
