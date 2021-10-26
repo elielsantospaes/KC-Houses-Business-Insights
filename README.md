@@ -1,6 +1,8 @@
 
 # KC Houses Business Insights
-Insights projct to help in the purchase houses dicision. <\br>
+![image](https://user-images.githubusercontent.com/80731935/138966516-52284254-e7c0-4186-8c6a-524156b9910e.png)
+
+Insights projct to help in the purchase houses dicision.
 EDA + Short Report. To see complete analysis and report check the files : KC_Houses.iýnb and KC_Houses_Business_Insights.pdf
 
 ## Abstract
