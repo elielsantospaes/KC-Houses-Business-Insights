@@ -7,6 +7,7 @@ Projeto de insights sobre compra e venda de imóveis de modo a maximizar os lucr
 The aim of the project is to define the best transactions opportunities within the portfolio. To find what houses should be bought, two approach were taken. First, a general comparison between houses with same condition and same region was done. With this approach the estimated profit was, in average, from 15% up to 65%. The second approach takes the effects of the houses features to refine the analysis trying to find high profitable opportunities. Based in the houses features, 10 hypothesis were checked, and for the validated hypothesis the estimated profit, in average, was 25%. Was found the 91% of the houses are in condition 3 and 4. That shows the people preference, and trading with those houses will be easier. Houses built after 2010 are all in condition 3, but the price can be higher than houses built before, even in better condition, what can generate good trade opportunities.
 <p>
  
+ ## Tabel of Contents
 
 ## 1. Introduction
 
@@ -69,3 +70,23 @@ The table ahead shows the retsults for the validated hypothesis. (The complete a
 
 **Table 2:** Results of the donfirmed hypothesis.</br>
  ![image](https://user-images.githubusercontent.com/80731935/138780033-3a1760d3-0367-4c2b-96e1-daf8ea46356d.png)
+ 
+ For each case, and included the general approach shown in the beginning of the report, a data set was generated. The files were named as sample_”name”.csv. For instance, for houses that attend the hypothesis H1 the file was named as “sample_h1.csv”, and so on. The files are in the dataset folder, and was used in the dashboard built in the streamlit library.
+ ## 4. Discussion
+The most part of the houses are in the condition 3 and 4, being 65% of houses in condition 3 and 26% in condition 4. So, there are more trade opportunities with houses in conditions 3 and 4. The business should focus in that kind of houses, due to the highest probability of trade. The conditions 1 and 2 should be discarded, or very well analyzed in each case before buy a house. Considering condition 5, let’s say those houses are high level houses and there is a specific group of clients for them, and the House Rocket should focus a small part of the houses in those houses condition.
+In the general approach were found 10113 trade opportunities. So, the number of houses found in the hypothesis, or probably in total, inside the set of houses taken for the first approach. So, looking for data from the hypothesis, we are looking for specific opportunities.
+The hypothesis 1 (H1) presents the highest profitable approach. Although, the estimated profit found in the hypothesis 8 is approximately the average of the estimated profit of the general approach and probably don’t represent the effect of the living room area in the price.
+In terms of number of bathrooms, the must part of the houses has 1 or more and 2.5 or less bathrooms, indication the preference of people for that feature.
+
+## 5. Conclusion
+The companies should focus the business in houses with condition 3 and 4, that represents 91% of total portfolio. 
+Houses with condition 1 and 2 should be discarded, or very well analyzed before be bought.
+The major part of the houses has at lest one bathroom. The companies should focus the business in houses the have at least one bathroom to increase the probability of trade.
+Considering the definition of profit estimation, houses with water front presents the highest estimated profit, being 25%, in average.
+Houses built after 2010, are in condition 3, but the price can be higher than houses built before, even in better condition. Buying houses built after 2010, can create good and profitable opportunities.
+
+## 6. Next Steps
+To compare the approach of median price with the averaged price for the profit estimation.
+Create prediction models for help in the decision of house to be bought.
+Create a prediction models for help to find the best moment to buy the houses.
+ 
