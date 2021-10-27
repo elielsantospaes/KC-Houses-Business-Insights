@@ -3,7 +3,7 @@
 ![image](https://user-images.githubusercontent.com/80731935/138966516-52284254-e7c0-4186-8c6a-524156b9910e.png)
 
 Insights projct to help in the purchase houses dicision.
-EDA + Short Report. To see complete analysis and report check the files : KC_Houses.iýnb and KC_Houses_Business_Insights.pdf
+EDA + Short Report. To see complete analysis check it out the file **KC_Houses.ipynb**. To see the complete report check it out the file **KC_Houses_Business_Insights.pdf**, in the report folder.
 
 ## Abstract
 <p style = "text-align: Justify">
