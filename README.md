@@ -2,8 +2,8 @@
 # KC Houses Business Insights
 ![image](https://user-images.githubusercontent.com/80731935/138966516-52284254-e7c0-4186-8c6a-524156b9910e.png)
 
-Insights projct to help in the purchase houses dicision.
-EDA + Short Report. To see complete analysis check it out the file **KC_Houses.ipynb**. To see the complete report check it out the file **KC_Houses_Business_Insights.pdf**, in the report folder.
+Insights projct to help in the houses purchase dicision.
+EDA + Short Report. To see complete analysis check it out the file **KC_Houses.ipynb**. To see the complete report check it out the file **KC_Houses_Business_Insights.pdf**, in the report folder. Teh dashboard of recommended houses can be visualizated <a href="https://hr-analytics-dashboard.herokuapp.com/">here</a>
 
 ## Abstract
 <p style = "text-align: Justify">
