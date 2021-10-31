@@ -7,7 +7,7 @@ EDA + Short Report. To see complete analysis check it out the file **KC_Houses.i
 
 ## Abstract
 <p style = "text-align: Justify">
-The aim of the project is to define the best transactions opportunities within the portfolio. To find what houses should be bought, two approach were taken. First, a general comparison between houses with same condition and same region was done. With this approach the estimated profit was, in average, from 15% up to 65%. The second approach takes the effects of the houses features to refine the analysis trying to find high profitable opportunities. Based in the houses features, 10 hypothesis were checked, and for the validated hypothesis the estimated profit, in average, was 25%. Was found the 91% of the houses are in condition 3 and 4. That shows the people preference, and trading with those houses will be easier. Houses built after 2010 are all in condition 3, but the price can be higher than houses built before, even in better condition, what can generate good trade opportunities.
+The aim of the project is to define the best transactions opportunities within the portfolio. To find what houses should be bought, two approach were taken. First, a general comparison between houses with same condition and same region was done. With this approach the estimated profit was on average from 15% up to 65%. The second approach takes the effects of the houses features to refine the analysis trying to find high profitable opportunities. Based in the houses features, 10 hypothesis were checked, and for the validated hypothesis the estimated profit on average was 25%. Was found the 91% of the houses are in condition 3 and 4. That shows the people preference, and trading with those houses will be easier. Houses built after 2010 are all in condition 3, but the price can be higher than houses built before, even in better condition, what can generate good trade opportunities.
 <p>
  
  ## Tabel of Contents
@@ -53,7 +53,7 @@ Looking fot houses with status Buy let's visualize the dsicount distribution.
 
 By the chart and the table we can conclude:</br>
     • There are 10113 houses with price lower than the median prices.</br>
-    • For these 10113 houses, in average, the prices are about 19% lower than the median prices, for a given region and condition.</br>
+    • For these 10113 houses on average the prices are about 19% lower than the median prices, for a given region and condition.</br>
     • 25% of the houses are with prices equal or lower than 27% of the median prices.</br>
       
 Based in the above conclusions, the data status will gain a new definition as follow:</br>
@@ -86,7 +86,7 @@ In terms of number of bathrooms, the must part of the houses has 1 or more and 2
 The companies should focus the business in houses with condition 3 and 4, that represents 91% of total portfolio. 
 Houses with condition 1 and 2 should be discarded, or very well analyzed before be bought.
 The major part of the houses has at lest one bathroom. The companies should focus the business in houses the have at least one bathroom to increase the probability of trade.
-Considering the definition of profit estimation, houses with water front presents the highest estimated profit, being 25%, in average.
+Considering the definition of profit estimation, houses with water front presents the highest estimated profit being on average 25%.
 Houses built after 2010, are in condition 3, but the price can be higher than houses built before, even in better condition. Buying houses built after 2010, can create good and profitable opportunities.
 
 ## 6. Next Steps
